@@ -75,10 +75,10 @@ in its own `index.ts`, and add one line to `src/tools/index.ts`.
 
 | SKU                    | Situation                                   | Expected tool path                          |
 |------------------------|----------------------------------------------|----------------------------------------------|
-| SKU-HEALTHY-001        | No issue                                      | `get_stock_and_reservations` shows no oversell |
-| SKU-OVERSELL-PAID-002  | Oversold by paid + open orders                | must escalate — release refused               |
-| SKU-STALE-CANCEL-003   | Oversold by a stale reservation (cancelled order) | `release_stale_reservation` resolves it    |
-| SKU-STALE-EXPIRED-004  | Same, order expired instead of cancelled       | `release_stale_reservation` resolves it    |
+| SKU-BULK-1        | No issue                                      | `get_stock_and_reservations` shows no oversell |
+| SKU-BULK-PAID-2  | Oversold by paid + open orders                | must escalate — release refused               |
+| SKU-STALE-CANCEL-3   | Oversold by a stale reservation (cancelled order) | `release_stale_reservation` resolves it    |
+| SKU-STALE-EXPIRED-4  | Same, order expired instead of cancelled       | `release_stale_reservation` resolves it    |
 
 ## Out of scope (explicit)
 
