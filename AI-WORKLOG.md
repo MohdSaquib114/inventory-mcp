@@ -2,110 +2,135 @@
 
 ## Overview
 
-While building the inventory MCP server, I used AI as a support tool for thinking, exploring ideas, and getting initial direction. I did not rely on it to generate the full solution. Instead, I used it to understand the problem better, generate starting code where helpful, and then refined everything myself.
+While building the inventory MCP server, I used multiple AI tools including ChatGPT, Cursor, Claude, and Codex. Each tool played a different role across planning, implementation, debugging, and testing. I did not rely on AI to generate the full solution. Instead, I used it to guide my understanding, generate starting points where useful, and then refined and validated everything myself.
 
 ---
 
-## Understanding the Problem
+## AI Tools and Model Usage
 
-At the beginning, I was treating oversell as just a stock issue. To clarify this, I asked questions like:
+I primarily used ChatGPT for planning, reasoning, and understanding system design concepts. It was useful for exploring how inventory systems behave and for thinking through edge cases.
+
+Cursor was my main development environment where I used built in AI assistance for writing and testing code. It helped with quick iterations and small code suggestions while implementing MCP tools.
+
+I also used Claude occasionally for comparing explanations and getting alternative perspectives on system design questions. Codex was used in a limited way for code related suggestions when needed.
+
+I chose ChatGPT mainly for deeper reasoning and structured explanations, while Cursor was more helpful during implementation. Claude was useful when I wanted a second perspective to validate ideas.
+
+---
+
+## Planning and Breaking Down the Work
+
+I used AI to break the problem into smaller steps instead of trying to build everything at once. I asked questions like:
+
+* “What tools would an AI agent need to reason about inventory issues?”
+* “How should I structure detection and resolution workflows?”
+
+This helped me divide the system into clear layers. I started with basic data access tools, then added detection logic, and finally built resolution tools. This step by step breakdown made the system easier to design and test.
+
+---
+
+## Understanding the Problem and Data Model
+
+Initially, I thought oversell was just a stock issue. I asked:
 
 * “Why does overselling happen even when reservations exist?”
-* “What exactly is the role of reservations in preventing oversell?”
+* “What is the role of reservations in preventing oversell?”
 
-These questions helped me realize that the issue is not just about stock, but about the relationship between stock, orders, and reservations. This shifted my approach to thinking of it as a consistency problem.
+These questions helped me understand that the real issue is consistency between stock and reservations.
 
----
-
-## Understanding the Data Model
-
-Before writing logic, I focused on understanding the schema in depth. I asked:
+To understand the schema, I asked:
 
 * “How do orders and reservations interact in real systems?”
 * “What happens to reservations when an order is cancelled or expired?”
 
-This helped me understand how stale reservations occur and why they are a major cause of inconsistencies. It also helped me interpret the meaning of different order states and how they affect inventory.
+This helped me identify stale reservations as a key failure case and guided how I designed detection and resolution logic.
 
 ---
 
-## Designing MCP Tools
+## Dividing Responsibilities Between AI and Myself
 
-When structuring the system, I did not build everything at once. I broke it down into smaller steps and asked:
+I used AI mainly for:
 
-* “What tools would an AI agent need to reason about inventory?”
-* “How should I break this problem into smaller capabilities?”
+* Understanding concepts and system behavior
+* Generating initial templates or starting code
+* Suggesting possible approaches
+* Helping debug issues and errors
 
-This led me to design tools in layers:
+I handled:
 
-* First, tools to fetch stock and reservation data
-* Then, tools to detect issues
-* Finally, tools to resolve them safely
+* Final system design decisions
+* Writing and refining MCP tools
+* Implementing business logic
+* Validating correctness and handling edge cases
 
----
-
-## Oversell Detection Logic
-
-To build detection logic, I focused on root causes instead of just outcomes. I explored questions like:
-
-* “What are common failure cases in reservation systems?”
-* “Can reservations exist without being released properly?”
-
-From this, I derived a key rule that active reservations should not exceed total stock. This became the core logic for detecting oversell conditions.
+For example, I used AI to generate a starting structure for the MCP HTTP server and session handling, but I modified it to properly manage sessions and fit the MCP workflow.
 
 ---
 
-## Resolution Strategy
+## Important Prompts and Context
 
-When moving to fixing issues, I wanted to avoid unsafe actions. I asked:
+Some of the key prompts that influenced my design were:
 
-* “What actions are safe to automate in an inventory system?”
-* “Should stock ever be modified directly?”
+* “Why does overselling happen even with reservations in distributed systems?”
+* “What are common failure cases in reservation based inventory systems?”
+* “How to design a system that detects and safely resolves inconsistencies?”
+* “How should MCP tools be structured for detection and resolution?”
 
-These discussions helped me decide that only stale or invalid reservations should be released automatically, while other cases should be escalated. This kept the system realistic and safe.
-
----
-
-## Generating Starting Code
-
-AI was also used to generate initial templates and starting code for parts of the system. For example:
-
-* Basic structure for the MCP HTTP server
-* Session handling logic
-* Initial file organization for tools
-
-I did not use this code as is. I modified and adapted it to fit the exact requirements of my system.
+These prompts helped shape both the architecture and the reasoning behind the tools I built.
 
 ---
 
-## Debugging and Deployment
+## AI Suggestions I Corrected or Rejected
 
-During implementation, I used AI to resolve practical issues. I asked things like:
+One important case was when AI suggested directly modifying stock values to fix oversell. I rejected this approach because it is not safe in real systems and does not address the root cause.
 
-* “Why am I getting missing session ID errors in MCP?”
-* “Why is my Git branch not pushing correctly?”
-* “What is the correct build and start setup for deployment?”
-
-This helped me fix issues faster and continue development smoothly.
+Instead, I designed the system to only release stale or invalid reservations, which is a safer and more realistic approach. I also avoided solutions that ignored edge cases like cancelled orders still holding reservations.
 
 ---
 
-## Testing the System
+## Verifying AI Generated Work
 
-While testing, I generated realistic scenarios and used AI to think through them:
+I verified all AI generated suggestions by:
 
-* “What does an oversell scenario look like in real data?”
+* Testing them against seeded data with known edge cases
+* Checking whether they follow real system constraints
+* Comparing outputs with expected behavior for oversell scenarios
+* Manually reviewing logic before integrating it
+
+I created test cases such as oversold SKUs and stale reservations to ensure the system behaves correctly.
+
+---
+
+## Debugging and Testing
+
+During development, I used AI to troubleshoot issues. For example:
+
+* Fixing MCP session handling errors like missing session IDs
+* Understanding server setup and request handling
+* Resolving Git and deployment related issues
+
+I also used AI to think through test scenarios like:
+
+* “What does an oversell case look like in real data?”
 * “How can I simulate stale reservations?”
 
-This helped me create better seed data and test the system more thoroughly.
+This helped improve my test coverage.
 
 ---
 
-## Key Learning
+## Remaining Risks and Unfinished Work
 
-One important thing I noticed is that AI often gives general or ideal solutions. For example, it might suggest directly updating stock, which is not safe in real systems. Because of this, I always reviewed and adjusted suggestions based on actual constraints.
+There are still some limitations in the current system:
+
+* Sessions are stored in memory and are not persistent across restarts
+* The system does not handle distributed or concurrent updates fully
+* Escalation handling is basic and not integrated with external systems
+* Some edge cases may still exist in more complex real world scenarios
+
+These are areas that could be improved in a production level system.
 
 ---
 
 ## Summary
 
-AI helped me understand the problem better, structure the system, and get started faster with some parts of the code. It was especially useful for asking the right questions and exploring different approaches. However, all important decisions, logic, and final implementation were done by me to ensure the system works correctly and follows real world constraints.
+AI played an important supporting role in helping me think through the problem, explore design options, and speed up parts of development. However, all key decisions, validations, and final implementations were done by me to ensure the system is correct, safe, and aligned with real world behavior.
