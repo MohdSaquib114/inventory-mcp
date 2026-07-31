@@ -65,8 +65,6 @@ export async function getStockAndReservations(
   };
 }
 
-
-
 export async function getStaleReservations(
   sku: string,
   staleMinutes: number = 15,
@@ -80,8 +78,14 @@ export async function getStaleReservations(
     WHERE r.sku = $1
       AND r.status = 'active'
       AND (
-        o.status IN ('cancelled', 'failed')
-        OR r.created_at < NOW() - ($2 * INTERVAL '1 minute')
+        -- Orders already invalid
+        o.status IN ('cancelled', 'expired')
+
+        -- OR open but too old (abandoned)
+        OR (
+          o.status = 'open'
+          AND r.created_at < NOW() - ($2 * INTERVAL '1 minute')
+        )
       )
     ORDER BY r.created_at ASC
     `,
@@ -106,6 +110,7 @@ export async function getReservationWithOrder(reservationId: number) {
      WHERE r.reservation_id = $1`,
     [reservationId],
   );
+
   return result.rows[0] ?? null;
 }
 
@@ -117,6 +122,7 @@ export async function releaseReservation(reservationId: number) {
      RETURNING reservation_id, order_id, sku, quantity`,
     [reservationId],
   );
+
   return result.rows[0] ?? null;
 }
 
@@ -131,5 +137,6 @@ export async function createEscalation(
      RETURNING id, sku, order_id, reason, status, created_at`,
     [sku, orderId, reason],
   );
+
   return result.rows[0];
 }

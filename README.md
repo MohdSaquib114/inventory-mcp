@@ -88,7 +88,4 @@ in its own `index.ts`, and add one line to `src/tools/index.ts`.
 - Authentication, a frontend, and CI/CD — excluded per the assignment brief.
 - Multi-SKU orders (one line item per order, to keep the schema simple).
 
-## Verification
 
-See `AI-WORKLOG.md` (to be added) for how each tool's behavior was verified
-against the seeded scenarios above.
